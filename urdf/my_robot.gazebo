@@ -39,6 +39,7 @@
     <material>Gazebo/DarkGrey</material>
   </gazebo>
 
+  <!-- Using the gazebo plugin for diffdrive or the diff_drive_controller/DiffDriveController
   <gazebo>
     <plugin filename="libgazebo_ros_diff_drive.so" name="differential_drive_controller">
       <alwaysOn>true</alwaysOn>
@@ -53,7 +54,27 @@
       <odometryFrame>odom</odometryFrame>
       <robotBaseFrame>link_chassis</robotBaseFrame>
     </plugin>
-  </gazebo>
+  </gazebo>-->
+
+  <transmission name="$left_wheel_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$left_wheel_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <transmission name="$right_wheel_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$right_wheel_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
 
   <gazebo reference="laser_scanner_link">
     <sensor type="ray" name="head_hokuyo_sensor">

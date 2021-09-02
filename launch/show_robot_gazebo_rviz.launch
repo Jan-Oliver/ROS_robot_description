@@ -12,7 +12,7 @@
 
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find my_robot_description)/worlds/simple_env_1.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+    <arg name="world_name" value="$(find my_robot_description)/worlds/navigation_example.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
     <arg name="debug" value="$(arg debug)" />
     <arg name="gui" value="$(arg gui)" />
     <arg name="paused" value="$(arg paused)"/>
@@ -26,14 +26,32 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
         args="-z 1.0 -unpause -urdf -model my_robot -param robot_description" respawn="false" output="screen" />
 
+  <!-- Combines the joint-state-messages to the state of the robot-->
+  <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+  </node>
+
 
   <!-- Starting rviz -->
-  <!-- Joint state publisher opens GUI to send fake Joint values -->
-  <node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
-  <node unless="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-  
-  <!-- These fake joint values are combined by the robot_state_publisher to a single robot which allows the visualization in rviz -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  
+  <!-- Load the yaml with the config for the state-publisher-controller-->
+  <rosparam command="load" file="$(find my_robot_description)/config/joint_state_controller.yaml"
+            ns="joint_state_controller" />
 
+
+  <!-- Load controller configurations from YAML file to parameter server -->
+  <rosparam command="load" file="$(find my_robot_description)/config/diff_drive_controller.yaml"
+            ns="diff_drive_controller" />
+
+  <!-- Spawn the controllers specified in args tag-->
+  <node name="my_robot_controller_spawner" 
+    pkg="controller_manager" 
+    type="spawner"
+    args="joint_state_controller
+          diff_drive_controller
+          --shutdown-timeout 3"/>
+
+  <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+      <param name="default_topic" value="/diff_drive_controller/cmd_vel"/>
+  </node>
 </launch>
