@@ -40,8 +40,7 @@
     pkg="controller_manager" 
     type="spawner"
     args="joint_state_controller
-          diff_drive_controller
-          --shutdown-timeout 3"/>
+          diff_drive_controller"/>
 
   <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
       <param name="default_topic" value="/diff_drive_controller/cmd_vel"/>
